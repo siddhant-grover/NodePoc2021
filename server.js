@@ -19,6 +19,12 @@ app.use(bodyParser.json())//middleware to decode the body coming in
 app.post('/api/change-password', async (req, res) => {
 	const { token,newpassword:plainTextPassword } = req.body//we get a json web token in body 
 
+  
+
+    try{
+    const user = jwt.verify(token,JWT_SECRET)//make sure that token is not tampered with, and returns only the payload part 
+    console.log("JWT Decoded:",user)
+    
     if (!plainTextPassword || typeof plainTextPassword !== 'string') {
 		return res.json({ status: 'error', error: 'Invalid password' })
 	}
@@ -29,10 +35,6 @@ app.post('/api/change-password', async (req, res) => {
 		})
 	}
 
-    try{
-    const user = jwt.verify(token,JWT_SECRET)//make sure that token is not tampered with, and returns only the payload part 
-    console.log("JWT Decoded:",user)
-
         //valid token/user
         const _id = user.id
         const hashedPassword= await bcrypt.hash(plainTextPassword,10)
@@ -41,7 +43,7 @@ app.post('/api/change-password', async (req, res) => {
         res.json({status:'ok'})
 
     }catch(error){
-        res.json({status:'error',error:'some one is messing around'})
+        res.json({status:'error',error:'login first'})
     }
     
     

@@ -5,13 +5,16 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registeration</title>
+    <link rel="stylesheet" href="index.css">
 </head>
 <body>
-    <h1>Registeration</h1>
+    
     <form id="reg-form"> 
+        <h1>Registeration</h1>
         <input type="text" id="UserName" placeholder="UserName"/>
         <input type="password" id="password" placeholder="Password"/>
-        <input type="submit" value="Submit form" />
+        <input type="submit" value="Submit form" /><br>
+        <div >Already Registered User ? Please <a href="/login.html">Login</a></div>
     </form>
     <script>
         const form = document.getElementById("reg-form")
@@ -46,5 +49,6 @@
         
     }
     </script>
+    
 </body>
 </html>

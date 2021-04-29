@@ -41,6 +41,7 @@
             console.log("got the token:",result.data)
             localStorage.setItem('token',result.data)
             alert("Success")
+            document.location.href="changepassword.html"
         }
         else{
             alert(result.error)
