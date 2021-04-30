@@ -24,7 +24,7 @@ app.post('/api/change-password', async (req, res) => {
     try{
     const user = jwt.verify(token,JWT_SECRET)//make sure that token is not tampered with, and returns only the payload part 
     console.log("JWT Decoded:",user)
-    
+
     if (!plainTextPassword || typeof plainTextPassword !== 'string') {
 		return res.json({ status: 'error', error: 'Invalid password' })
 	}
@@ -44,6 +44,7 @@ app.post('/api/change-password', async (req, res) => {
 
     }catch(error){
         res.json({status:'error',error:'login first'})
+
     }
     
     
