@@ -5,9 +5,10 @@ const mongoose = require('mongoose')
 const User = require('./model/user')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const JWT_SECRET = "bangyourheadonthekeyboard" 
+require("dotenv").config();
+const JWT_SECRET = process.env.JWT_SECRET
 
-mongoose.connect('mongodb://localhost:27017/login-app-db',{
+mongoose.connect(process.env.MONGO_SERVER,{
     useNewUrlParser: true,
     useUnifiedTopology:true,
     useCreateIndex:true
@@ -27,14 +28,11 @@ function passwordValidation(plainTextPassword){
 		}
 	}
     else
-    return;
+        return;
 }
 
 app.post('/api/change-password', async (req, res) => {
 	const { token,newpassword:plainTextPassword } = req.body//we get a json web token in body 
-
-  
-
     try{
     const user = jwt.verify(token,JWT_SECRET)
         //console.log("JWT Decoded:",user)
@@ -53,8 +51,6 @@ app.post('/api/change-password', async (req, res) => {
         res.json({status:'error',error:'login first'})
 
     }
-    
-    
 })
 
 app.post('/api/login',async(req,res)=>{
@@ -81,18 +77,18 @@ app.post('/api/login',async(req,res)=>{
 
 
 app.post('/api/register',async (req,res)=>{ 
-        //console.log(req.body);
+    //console.log(req.body);
 
     const {username,password:plainTextPassword} = req.body //renaming when destructuring
 
-//validation
+    //validation
     if (!username || typeof username !== 'string') {
 		return res.json({ status: 'error', error: 'Invalid username' })
 	}
      
     if(passwordValidation(plainTextPassword))
     return res.json(passwordValidation(plainTextPassword))
-//
+
     const password = await bcrypt.hash(plainTextPassword,10);
 
     //now thow the username,password combo in db
@@ -102,7 +98,7 @@ app.post('/api/register',async (req,res)=>{
             password
         })
         
-       // console.log('User created successfully',response);
+    // console.log('User created successfully',response);
 
     }catch(error){
         if(error.code===11000){
@@ -111,10 +107,9 @@ app.post('/api/register',async (req,res)=>{
         }
         throw error
     }
-    
-
     res.json({status:'ok'})//automatically set headers 
 })
-app.listen(5000,()=>{
+
+app.listen(process.env.PORT||5000,()=>{
     console.log("server up and running");
 })
