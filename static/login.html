@@ -20,9 +20,7 @@
         const form = document.getElementById("login")
         form.addEventListener("submit",login)
 
-        
 
-//now send this data to node server, 1.send data as JSON (use this here), 2. send data as urlencoded
     async function login(event){
         event.preventDefault()
         const username = document.getElementById('UserName').value
@@ -37,10 +35,10 @@
                 password
             })
         }).then((res)=>res.json())
-        console.log(result);
+        //console.log(result);
         if(result.status==="ok"){
             //everything went fine
-            console.log("got the token:",result.data)
+           // console.log("got the token:",result.data)
             localStorage.setItem('token',result.data)
             alert("Success")
             document.location.href="changepassword.html"

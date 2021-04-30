@@ -22,7 +22,7 @@
 
         
 
-//now send this data to node server, 1.send data as JSON (use this here), 2. send data as urlencoded
+
     async function registerUser(event){
         event.preventDefault()
         const username = document.getElementById('UserName').value
@@ -38,7 +38,7 @@
                 password
             })
         }).then((res)=>res.json())
-        console.log(result);
+       // console.log(result);
         if(result.status==="ok"){
             //everything went fine
             alert("Success")

@@ -5,7 +5,7 @@ const mongoose = require('mongoose')
 const User = require('./model/user')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const JWT_SECRET = "bangyourheadonthekeyboard" //if your secret is leaked, your json payload can be manipulated 
+const JWT_SECRET = "bangyourheadonthekeyboard" 
 
 mongoose.connect('mongodb://localhost:27017/login-app-db',{
     useNewUrlParser: true,
@@ -13,8 +13,22 @@ mongoose.connect('mongodb://localhost:27017/login-app-db',{
     useCreateIndex:true
 })
 const app = express();
-app.use('/',express.static(path.join(__dirname,'static')));//if a user requests , localhost:9999/image.jpg, it goona hit this middleware , so ganna serve you this static file from static folder
+app.use('/',express.static(path.join(__dirname,'static')));
 app.use(bodyParser.json())//middleware to decode the body coming in 
+
+function passwordValidation(plainTextPassword){
+    if (!plainTextPassword || typeof plainTextPassword !== 'string') {
+		return { status: 'error', error: 'Invalid password' }
+	}
+    if (plainTextPassword.length < 5) {
+		return {
+			status: 'error',
+			error: 'Password too small. Should be atleast 6 characters'
+		}
+	}
+    else
+    return;
+}
 
 app.post('/api/change-password', async (req, res) => {
 	const { token,newpassword:plainTextPassword } = req.body//we get a json web token in body 
@@ -22,18 +36,11 @@ app.post('/api/change-password', async (req, res) => {
   
 
     try{
-    const user = jwt.verify(token,JWT_SECRET)//make sure that token is not tampered with, and returns only the payload part 
-    console.log("JWT Decoded:",user)
+    const user = jwt.verify(token,JWT_SECRET)
+        //console.log("JWT Decoded:",user)
 
-    if (!plainTextPassword || typeof plainTextPassword !== 'string') {
-		return res.json({ status: 'error', error: 'Invalid password' })
-	}
-    if (plainTextPassword.length < 5) {
-		return res.json({
-			status: 'error',
-			error: 'Password too small. Should be atleast 6 characters'
-		})
-	}
+        if(passwordValidation(plainTextPassword))
+        return res.json(passwordValidation(plainTextPassword))
 
         //valid token/user
         const _id = user.id
@@ -58,8 +65,7 @@ app.post('/api/login',async(req,res)=>{
 		return res.json({ status: 'error', error: 'Invalid username/password' })
 	}
 
-    if(await bcrypt.compare(password,user.password)){ //comapring the plain entered password with the hased password stored in db
-        //the username , password combination is successfull
+    if(await bcrypt.compare(password,user.password)){ 
 
         const token  = jwt.sign({ //dont keep sensitive data in payload
             id:user._id ,
@@ -72,21 +78,10 @@ app.post('/api/login',async(req,res)=>{
 
     res.json({status:'error',error: 'Invalid username/password'})
 })
-//Client->Server : Your client *somehow* has to authenticate who it is 
-//Why - Server is a central computer which you cannot control
-//Client(john) -> a computer which you dont control
-
-// ways to authenticate that is he really who he says he is
-//1.Client proves itself somehow on the secret/data (secret/data is NON CHANGABLE) (JWT)
-//2.Client-Server share a secret (Cookie)
-
-//JWT is not an encryption , not for storing sensitive data , it just saying that hey client you can go ahead and use this token to communicate with me and i would know you are the client you say you are
-//jwt token has 3 parts, only middle part has payload other 2 are for validation , that this data has not been tampered with
 
 
-app.post('/api/register',async (req,res)=>{ //async as we will male db calls 
-
-    console.log(req.body);//we need body parser to access body data 
+app.post('/api/register',async (req,res)=>{ 
+        //console.log(req.body);
 
     const {username,password:plainTextPassword} = req.body //renaming when destructuring
 
@@ -94,15 +89,9 @@ app.post('/api/register',async (req,res)=>{ //async as we will male db calls
     if (!username || typeof username !== 'string') {
 		return res.json({ status: 'error', error: 'Invalid username' })
 	}
-    if (!plainTextPassword || typeof plainTextPassword !== 'string') {
-		return res.json({ status: 'error', error: 'Invalid password' })
-	}
-    if (plainTextPassword.length < 5) {
-		return res.json({
-			status: 'error',
-			error: 'Password too small. Should be atleast 6 characters'
-		})
-	}
+     
+    if(passwordValidation(plainTextPassword))
+    return res.json(passwordValidation(plainTextPassword))
 //
     const password = await bcrypt.hash(plainTextPassword,10);
 
@@ -113,7 +102,7 @@ app.post('/api/register',async (req,res)=>{ //async as we will male db calls
             password
         })
         
-        console.log('User created successfully',response);
+       // console.log('User created successfully',response);
 
     }catch(error){
         if(error.code===11000){
@@ -126,13 +115,6 @@ app.post('/api/register',async (req,res)=>{ //async as we will male db calls
 
     res.json({status:'ok'})//automatically set headers 
 })
-app.listen(9999,()=>{
+app.listen(5000,()=>{
     console.log("server up and running");
 })
-
-
-
-//we use hashing of passwords , egs using-> bcrypt,md5,sha1,sha256,sha512
-//in hashing algorithms 
-//1.The collision should be improbable
-//2.the algorithm should be slow (as if attacked by a brute force high cpu consuption)
